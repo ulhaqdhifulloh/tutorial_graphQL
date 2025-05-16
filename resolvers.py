@@ -208,6 +208,44 @@ def resolve_create_character(_, info, input):
         raise Exception(f"Karakter '{input['name']}' sudah ada.")
     finally:
         conn.close()
+        
+@mutation.field("updateCharacter")
+def resolve_update_character(_, info, input):
+    conn = get_db_connection()
+    try:
+        char = conn.execute("SELECT * FROM characters WHERE id = ?", (input["id"],)).fetchone()
+        if not char:
+            raise Exception(f"Karakter dengan ID {input['id']} tidak ditemukan.")
+
+        conn.execute(
+            "UPDATE characters SET name = ?, species = ?, home_planet_id = ? WHERE id = ?",
+            (
+                input.get("name", char["name"]),
+                input.get("species", char["species"]),
+                input.get("homePlanetId", char["home_planet_id"]),
+                input["id"],
+            ),
+        )
+        conn.commit()
+        updated = conn.execute("SELECT id, name, species, home_planet_id FROM characters WHERE id = ?", (input["id"],)).fetchone()
+        return dict(updated)
+    finally:
+        conn.close()
+
+@mutation.field("deleteCharacter")
+def resolve_delete_character(_, info, id):
+    conn = get_db_connection()
+    try:
+        char = conn.execute("SELECT id FROM characters WHERE id = ?", (id,)).fetchone()
+        if not char:
+            raise Exception(f"Karakter dengan ID {id} tidak ditemukan.")
+
+        conn.execute("DELETE FROM character_starships WHERE character_id = ?", (id,))
+        conn.execute("DELETE FROM characters WHERE id = ?", (id,))
+        conn.commit()
+        return True
+    finally:
+        conn.close()
 
 @mutation.field("assignStarship")
 def resolve_assign_starship(_, info, input):
@@ -229,6 +267,44 @@ def resolve_assign_starship(_, info, input):
             (input["characterId"],),
         ).fetchone()
         return dict(character)
+    finally:
+        conn.close()
+        
+@mutation.field("updateStarship")
+def resolve_update_starship(_, info, input):
+    conn = get_db_connection()
+    try:
+        starship = conn.execute("SELECT * FROM starships WHERE id = ?", (input["id"],)).fetchone()
+        if not starship:
+            raise Exception(f"Starship dengan ID {input['id']} tidak ditemukan.")
+
+        conn.execute(
+            "UPDATE starships SET name = ?, model = ?, manufacturer = ? WHERE id = ?",
+            (
+                input.get("name", starship["name"]),
+                input.get("model", starship["model"]),
+                input.get("manufacturer", starship["manufacturer"]),
+                input["id"],
+            ),
+        )
+        conn.commit()
+        updated = conn.execute("SELECT id, name, model, manufacturer FROM starships WHERE id = ?", (input["id"],)).fetchone()
+        return dict(updated)
+    finally:
+        conn.close()
+
+@mutation.field("deleteStarship")
+def resolve_delete_starship(_, info, id):
+    conn = get_db_connection()
+    try:
+        starship = conn.execute("SELECT id FROM starships WHERE id = ?", (id,)).fetchone()
+        if not starship:
+            raise Exception(f"Starship dengan ID {id} tidak ditemukan.")
+
+        conn.execute("DELETE FROM character_starships WHERE starship_id = ?", (id,))
+        conn.execute("DELETE FROM starships WHERE id = ?", (id,))
+        conn.commit()
+        return True
     finally:
         conn.close()
 

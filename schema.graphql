@@ -12,7 +12,11 @@ type Mutation {
   updatePlanet(input: UpdatePlanetInput!): Planet
   deletePlanet(id: ID!): Boolean
   createCharacter(input: CreateCharacterInput!): Character
+  updateCharacter(input: UpdateCharacterInput!): Character
+  deleteCharacter(id: ID!): Boolean
   assignStarship(input: AssignStarshipInput!): Character
+  updateStarship(input: UpdateStarshipInput!): Starship
+  deleteStarship(id: ID!): Boolean
 }
 
 input CreatePlanetInput {
@@ -34,9 +38,23 @@ input CreateCharacterInput {
   homePlanetId: Int
 }
 
+input UpdateCharacterInput {
+  id: ID!
+  name: String
+  species: String
+  homePlanetId: Int
+}
+
 input AssignStarshipInput {
   characterId: ID!
   starshipId: ID!
+}
+
+input UpdateStarshipInput {
+  id: ID!
+  name: String
+  model: String
+  manufacturer: String
 }
 
 type Character {
